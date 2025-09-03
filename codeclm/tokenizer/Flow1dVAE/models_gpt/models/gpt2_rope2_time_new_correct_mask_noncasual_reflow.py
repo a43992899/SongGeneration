@@ -50,7 +50,7 @@ from transformers.utils import (
     replace_return_docstrings,
 )
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
-from models_gpt.models.gpt2_config import GPT2Config
+from .gpt2_config import GPT2Config
 
 
 if is_flash_attn_2_available():

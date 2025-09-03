@@ -1,3 +1,6 @@
 launchs/
 **/__pycache__
 sample/generated/
+third_party
+tmp
+ckpt

@@ -1,7 +1,7 @@
 import json
 import torch
 from tqdm import tqdm
-from model_septoken import PromptCondAudioDiffusion
+from .model_septoken import PromptCondAudioDiffusion
 from diffusers import DDIMScheduler, DDPMScheduler
 import torchaudio
 import librosa
@@ -9,8 +9,8 @@ import os
 import math
 import numpy as np
 # from tools.get_mulan import get_mulan
-from tools.get_1dvae_large import get_model
-import tools.torch_tools as torch_tools
+from .tools.get_1dvae_large import get_model
+from .tools import torch_tools as torch_tools
 from safetensors.torch import load_file
 from third_party.demucs.models.pretrained import get_model_from_yaml
 from filelock import FileLock
