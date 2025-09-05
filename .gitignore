@@ -4,3 +4,4 @@ sample/generated/
 third_party
 tmp
 ckpt
+output/

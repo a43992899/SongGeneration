@@ -569,7 +569,7 @@ class PromptCondAudioDiffusion(nn.Module):
     
 
     @torch.no_grad()
-    def fetch_codes_batch(self, input_audios, additional_feats,layer):
+    def fetch_codes_batch(self, input_audios, additional_feats,layer,mode=None):
         input_audio_0 = input_audios[:,0,:]
         input_audio_1 = input_audios[:,1,:]
         input_audio_0 = self.preprocess_audio(input_audio_0)
@@ -590,7 +590,10 @@ class PromptCondAudioDiffusion(nn.Module):
 
         self.rvq_bestrq_emb.eval()
         quantized_bestrq_emb, codes_bestrq_emb, *_ = self.rvq_bestrq_emb(bestrq_emb) # b,d,t
-
+        if mode=='pre_vq':
+            return bestrq_emb
+        if mode=='vq_emb':
+            return quantized_bestrq_emb
 
         if('spk' in additional_feats):
             self.xvecmodel.eval()
