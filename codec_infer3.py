@@ -44,7 +44,7 @@ class MucodecTokenizer:
 
         encode_tokens = []
         if self.use_mix_tokenizer:
-            tokens, scale = self.audio_tokenizer.encode(src_wav)
+            tokens, scale = self.audio_tokenizer.encode_latent(src_wav)
             encode_tokens.append(tokens)
         token_seq_len = np.min([e.shape[-1] for e in encode_tokens])
         encode_tokens = [e[..., :token_seq_len] for e in encode_tokens]
@@ -74,9 +74,6 @@ def codec_infer(
 
     tokens = model.encoder(src_audio)
 
-    os.makedirs(f'{save_dir}', exist_ok=True)
-    gen_audio = model.decoder(tokens[:, :1])
-    torchaudio.save(f'{save_dir}/{os.path.basename(src_audio).split(".")[0]}_recon_wo_sep.wav', gen_audio[0].cpu().float(), cfg.sample_rate)
 
 
 def decoder_audios(
@@ -111,7 +108,7 @@ if __name__ == "__main__":
     np.random.seed(int(time.time()))
     ckpt_path = "./ckpt/songgeneration_base"
     save_dir = "./tmp"
-    src_audio = "sample/sample_prompt_audio.wav"
+    src_audio = "sample/0027_blackened.wav"
     
     codec_infer(
         ckpt_path=ckpt_path,

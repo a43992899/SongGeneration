@@ -132,6 +132,13 @@ class Flow1dVAE1rvq(AudioTokenizer):
         codes = self.model.sound2code(x) # [B T] -> [B N T]
         return codes, None
 
+    @torch.no_grad()
+    def encode_latent(self, x: torch.Tensor, mode='pre_vq') -> tp.Tuple[torch.Tensor, tp.Optional[torch.Tensor]]:
+        if x.ndim == 2:
+            x = x.unsqueeze(1)
+        latent = self.model.sound2latent(x, mode=mode) # [B T] -> [B N T]
+        return latent, None
+
     
     @torch.no_grad()    
     def decode(self, codes: torch.Tensor, prompt = None, scale: tp.Optional[torch.Tensor] = None, ncodes=9):
