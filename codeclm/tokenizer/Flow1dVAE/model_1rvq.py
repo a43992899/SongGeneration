@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchaudio
+from einops import rearrange, repeat, reduce
 
 from .tools.torch_tools import wav_to_fbank
 
@@ -393,6 +394,17 @@ class PromptCondAudioDiffusion(nn.Module):
         #[b,t,1024] t=t/960
         #35.84s->batch,896,1024
         return bestrq_emb
+    
+    def extract_bestrq_embeds_mono(self, input_audio,layer):
+        self.bestrq.eval()
+        input_wav_mean = input_audio
+        input_wav_mean = self.bestrq(self.rsq48tobestrq(input_wav_mean), features_only = True)
+        layer_results = input_wav_mean['layer_results']
+        bestrq_emb = layer_results[layer]
+        bestrq_emb = bestrq_emb.permute(0,2,1).contiguous()
+        #[b,t,1024] t=t/960
+        #35.84s->batch,896,1024
+        return bestrq_emb
 
 
     def extract_spk_embeds(self, input_audios):
@@ -601,9 +613,28 @@ class PromptCondAudioDiffusion(nn.Module):
         else:
             spk_embeds = None
 
-        # return [codes_prompt, codes_wav2vec], [prompt_embeds, wav2vec_embeds], spk_embeds
-        # return [codes_prompt_7, codes_prompt_13, codes_prompt_20, codes_wav2vec_half, codes_wav2vec_last], [prompt_embeds_7, prompt_embeds_13, prompt_embeds_20, wav2vec_embeds_half, wav2vec_embeds_last], spk_embeds
-        # return [codes_bestrq_middle, codes_bestrq_last], [bestrq_middle, bestrq_last], spk_embeds
+        return [codes_bestrq_emb], [bestrq_emb], spk_embeds
+    
+    @torch.no_grad()
+    def fetch_codes_batch_mono(self, input_audios, additional_feats,layer,mode=None):
+        self.bestrq.eval()
+
+        bestrq_emb = self.extract_bestrq_embeds_mono(input_audios,layer)
+        bestrq_emb = bestrq_emb.detach()
+
+        self.rvq_bestrq_emb.eval()
+        quantized_bestrq_emb, codes_bestrq_emb, *_ = self.rvq_bestrq_emb(bestrq_emb) # b,d,t
+        if mode=='pre_vq':
+            return rearrange(bestrq_emb,'b d t -> b t d')
+        if mode=='vq_emb':
+            return rearrange(quantized_bestrq_emb,'b d t -> b t d')
+
+        if('spk' in additional_feats):
+            self.xvecmodel.eval()
+            spk_embeds = self.extract_spk_embeds(input_audios)
+        else:
+            spk_embeds = None
+
         return [codes_bestrq_emb], [bestrq_emb], spk_embeds
 
     @torch.no_grad()

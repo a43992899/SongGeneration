@@ -131,39 +131,10 @@ class Tango:
     @torch.no_grad()
     @torch.autocast(device_type="cuda", dtype=torch.float32)
     def sound2latent(self, orig_samples, batch_size=3, mode='pre_vq'):
-        if(orig_samples.ndim == 2):
-            audios = orig_samples.unsqueeze(0).to(self.device)
-        elif(orig_samples.ndim == 3):
-            audios = orig_samples.to(self.device)
-        else:
-            assert orig_samples.ndim in (2,3), orig_samples.shape
-        audios = self.preprocess_audio(audios)
-        audios = audios.squeeze(0)
-        orig_length = audios.shape[-1]
-        min_samples = int(40 * self.sample_rate)
-        # 40秒对应10个token
-        output_len = int(orig_length / float(self.sample_rate) * 25) + 1
-        print("output_len: ", output_len)
-
-        while(audios.shape[-1] < min_samples):
-            audios = torch.cat([audios, audios], -1)
-        int_max_len=audios.shape[-1]//min_samples+1
-        audios = torch.cat([audios, audios], -1)
-        audios=audios[:,:int(int_max_len*(min_samples))]
-        codes_list=[]
-
-        audio_input = audios.reshape(2, -1, min_samples).permute(1, 0, 2).reshape(-1, 2, min_samples)
-
-        for audio_inx in range(0, audio_input.shape[0], batch_size):
-            # import pdb; pdb.set_trace()
-            codes, _, spk_embeds = self.model.fetch_codes_batch((audio_input[audio_inx:audio_inx+batch_size]), additional_feats=[],layer=self.layer_num)
-            codes_list.append(torch.cat(codes, 1))
-            # print("codes_list",codes_list[0].shape)
-
-        codes = torch.cat(codes_list, 0).permute(1,0,2).reshape(1, -1)[None] # B 3 T -> 3 B T
-        codes=codes[:,:,:output_len]
-
-        return codes
+        audios = self.preprocess_audio(orig_samples).to(self.device)
+        audios = audios.mean(1)
+        emb = self.model.fetch_codes_batch_mono(audios, additional_feats=[],layer=self.layer_num, mode=mode)
+        return (emb,)
 
     @torch.no_grad()
     def code2sound(self, codes, prompt=None, duration=40, guidance_scale=1.5, num_steps=20, disable_progress=False):

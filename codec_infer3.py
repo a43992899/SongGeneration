@@ -108,7 +108,7 @@ if __name__ == "__main__":
     np.random.seed(int(time.time()))
     ckpt_path = "./ckpt/songgeneration_base"
     save_dir = "./tmp"
-    src_audio = "sample/0027_blackened.wav"
+    src_audio = "sample/sample_prompt_audio.wav"
     
     codec_infer(
         ckpt_path=ckpt_path,
