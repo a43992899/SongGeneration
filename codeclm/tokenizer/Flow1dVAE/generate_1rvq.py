@@ -11,14 +11,16 @@ import numpy as np
 from .tools.get_1dvae_large import get_model
 from .tools import torch_tools as torch_tools
 from safetensors.torch import load_file
+import torch.nn as nn
 
-class Tango:
+class Tango(nn.Module):
     def __init__(self, \
         model_path, \
         vae_config="",
         vae_model="",
         layer_num=6, \
         device="cuda:0"):
+        super().__init__()
         
         self.sample_rate = 48000
         scheduler_name = "configs/scheduler/stable_diffusion_2.1_largenoise_sample.json"

@@ -31,6 +31,19 @@
             ],
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "levo",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/cli.py",
+            "args": [
+                "fit",
+                "-c",
+                "probe.LeVo.GTZANGenre.yaml",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

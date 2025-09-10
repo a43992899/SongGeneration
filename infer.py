@@ -38,7 +38,7 @@ class MucodecTokenizer:
         return gen_audio
 
 
-def load_model(config_path, device='cpu'):
+def load_model(config_path):
     """
     加载模型。如果指定的 ckpt_path 不存在，则从 Hugging Face 下载。
     """
@@ -48,8 +48,6 @@ def load_model(config_path, device='cpu'):
     
     # 加载模型配置
     model = builders.get_audio_tokenizer_model(cfg.audio_tokenizer_checkpoint, cfg)
-    
-    model.to(device)
     model.eval()
     return model
 
@@ -93,12 +91,12 @@ if __name__ == "__main__":
     # Example usage
     config_path = 'ckpt/songgeneration_base/config.yaml'
     
-    encoder = VQEncoder(config_path, mode='vq_emb')
+    encoder = VQEncoder(config_path, mode='pre_vq').cuda()
     
     # Create a dummy audio tensor (batch_size=1, channels=1, time=72000)
-    audio = torch.randn(1, 1, 48000*5)
+    audio = torch.randn(1, 1, 48000*5).cuda()
     
     # Forward pass
-    emb = encoder(audio)[0] # Shape: (n_q, T)
-    print("Quantized shape:", emb.shape)
+    emb = encoder(audio)[0]
+    print("Quantized shape:", emb.shape, emb.device)
     
