@@ -67,7 +67,8 @@ def codec_infer(
         use_mix_tokenizer=True
     )
 
-    tokens = model.encoder(src_audio)
+    emb = model.encoder(src_audio)
+    return emb
 
 
 
@@ -96,17 +97,19 @@ def decoder_audios(
 
 if __name__ == "__main__":
     torch.backends.cudnn.enabled = False
-    OmegaConf.register_new_resolver("eval", lambda x: eval(x))
-    OmegaConf.register_new_resolver("concat", lambda *x: [xxx for xx in x for xxx in xx])
-    OmegaConf.register_new_resolver("get_fname", lambda: os.path.splitext(os.path.basename(sys.argv[1]))[0])
-    OmegaConf.register_new_resolver("load_yaml", lambda x: list(OmegaConf.load(x)))
+    # OmegaConf.register_new_resolver("eval", lambda x: eval(x))
+    # OmegaConf.register_new_resolver("concat", lambda *x: [xxx for xx in x for xxx in xx])
+    # OmegaConf.register_new_resolver("get_fname", lambda: os.path.splitext(os.path.basename(sys.argv[1]))[0])
+    # OmegaConf.register_new_resolver("load_yaml", lambda x: list(OmegaConf.load(x)))
     np.random.seed(int(time.time()))
     ckpt_path = "./ckpt/songgeneration_base"
     save_dir = "./tmp"
     src_audio = "sample/sample_prompt_audio.wav"
     
-    codec_infer(
+    emb = codec_infer(
         ckpt_path=ckpt_path,
         save_dir=save_dir,
         src_audio=src_audio,
     )
+    
+    print("emb[0].shape:", emb[0].shape)
