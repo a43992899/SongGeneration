@@ -39,16 +39,11 @@ class MucodecTokenizer:
             src_wav = torch.cat([src_wav, src_wav], dim=0)
         return src_wav
 
-    def encoder(self, src_audio, **kwargs):
-        src_wav = self.read_audio(src_audio)
-
-        encode_tokens = []
-        if self.use_mix_tokenizer:
-            tokens, scale = self.audio_tokenizer.encode_latent(src_wav)
-            encode_tokens.append(tokens)
-        token_seq_len = np.min([e.shape[-1] for e in encode_tokens])
-        encode_tokens = [e[..., :token_seq_len] for e in encode_tokens]
-        return torch.cat(encode_tokens, dim=1)
+    def encoder(self, src_audio, mode="pre_vq"):
+        if type(src_audio) is str:
+            src_audio = self.read_audio(src_audio)
+        emb, _ = self.audio_tokenizer.encode_latent(src_audio, mode=mode)
+        return emb
 
     def decoder(self, gen_tokens):
         assert gen_tokens.shape[1] == 1
