@@ -17,7 +17,7 @@ trainer:
   callbacks:
     - class_path: lightning.pytorch.callbacks.ModelCheckpoint
       init_args:
-        dirpath: "./output/probe.GS.LeVo.vq_emb/checkpoints/" # Please specify your own path
+        dirpath: "./output/probe.GS.LeVo.pre_vq/checkpoints/" # Please specify your own path
         filename: "best"
         save_top_k: 1 # -1 to save all checkpoints
     - class_path: marble.modules.callbacks.LoadLatestCheckpointCallback # for testing
@@ -33,8 +33,8 @@ trainer:
     class_path: lightning.pytorch.loggers.WandbLogger
     init_args:
       project: "marble"
-      name: "probe.GS.LeVo.vq_emb"
-      save_dir: "./output/probe.GS.LeVo.vq_emb/"
+      name: "probe.GS.LeVo.pre_vq"
+      save_dir: "./output/probe.GS.LeVo.pre_vq/"
 
 
 model:
@@ -47,7 +47,7 @@ model:
       class_path: infer.VQEncoder
       init_args:
         config_path: "ckpt/songgeneration_base/config.yaml"
-        mode: vq_emb
+        mode: pre_vq
       
     emb_transforms:
       - class_path: marble.modules.transforms.MLPReduce
